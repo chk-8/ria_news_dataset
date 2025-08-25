@@ -30,3 +30,35 @@ If you're using the data in a research please consider citing the mentioned pape
     	booktitle={Proceedings of the 41st European Conference on Information Retrieval},
     	year={2019}
     }
+
+## Pipeline CLI
+
+Install dependencies (Python 3.10+ recommended):
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Run processing on a sample subset and save CSV:
+
+```bash
+python -m src.cli process --input ria_20.json --out outputs/ria20_enriched.csv --limit 200
+```
+
+Provide lexicons for sentiment (RuSentiLex and NRC-RU formats below):
+
+```bash
+python -m src.cli process \
+  --input ria_1k.json \
+  --rusentilex lexicons/rusentilex.json \
+  --nrc lexicons/nrc_ru.json \
+  --out outputs/ria1k_enriched.csv
+```
+
+Lexicon formats:
+
+- `rusentilex.json`: `{ "слово": polarity_float, ... }`
+- `nrc_ru.json`: `{ "слово": { "positive": 1|0, "negative": 1|0, "anger": 1|0, ... }, ... }`
+
+Topic modeling uses a lightweight GSDMM implementation suitable for short titles (no GPU required).

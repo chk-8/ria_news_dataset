@@ -1,11 +1,11 @@
 import re
 from typing import List, Tuple
 
+from pymystem3 import Mystem
 from razdel import tokenize
-import pymorphy2
 
 
-_morph = pymorphy2.MorphAnalyzer()
+_mystem = None
 
 
 RUSSIAN_STOPWORDS = set(
@@ -39,18 +39,21 @@ def normalize_text(text: str) -> str:
 	return text
 
 
+def _ensure_models() -> None:
+	global _mystem
+	if _mystem is None:
+		_mystem = Mystem()
+
+
 def tokenize_words(text: str) -> List[str]:
 	return [t.text for t in tokenize(text)]
 
 
 def lemmatize_tokens(tokens: List[str]) -> List[str]:
-	lemmas: List[str] = []
-	for tok in tokens:
-		if not tok:
-			continue
-		lemma = _morph.parse(tok)[0].normal_form
-		lemmas.append(lemma)
-	return lemmas
+	_ensure_models()
+	joined = " ".join(tokens)
+	mystem_lemmas = _mystem.lemmatize(joined)
+	return [l.strip() for l in mystem_lemmas if l.strip()]
 
 
 def filter_tokens(tokens: List[str]) -> List[str]:
@@ -64,4 +67,3 @@ def preprocess_title(text: str) -> Tuple[str, List[str]]:
 	lemmas = lemmatize_tokens(toks)
 	filtered = filter_tokens(lemmas)
 	return " ".join(filtered), filtered
-
